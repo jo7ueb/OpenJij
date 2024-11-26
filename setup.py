@@ -35,6 +35,7 @@ setup(
         "openjij",
         "openjij.model",
         "openjij.sampler",
+        "openjij.sampler.chimera_gpu",
         "openjij.utils",
     ],
     cmake_install_dir="openjij",

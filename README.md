@@ -51,12 +51,13 @@
 
 ### install via pip
 
-> Note: (2023/08/09) GPGPU algorithms will no longer be supported.
+> Note: To use GPGPU algorithms, please follow the section [`install via pip from source codes`](#install-via-pip-from-source-codes) below.
+> GPGPU algorithms are automatically enabled once CMake finds CUDA frameworks during installation.
 
 ```
 # Binary
 $ pip install openjij 
-# From Source
+# From Source (CUDA)
 $ pip install --no-binary=openjij openjij
 ```
 

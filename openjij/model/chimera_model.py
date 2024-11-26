@@ -25,7 +25,7 @@ def make_ChimeraModel(linear, quadratic):
     Returns:
         generated ChimeraModel class
     """
-    
+
     class ChimeraModel(make_BinaryQuadraticModel(linear, quadratic,sparse=True)):
         """Binary quadnratic model dealing with chimera graph This model deal
 
@@ -39,7 +39,7 @@ def make_ChimeraModel(linear, quadratic):
             >>> chimera_model = ChimeraModel(Q, unit_num_L=2)  # make
             >>> chimera_self.validate_chimera()
         """
-        
+
         def __init__(
                     self,
                     linear: dict = {},
@@ -48,13 +48,17 @@ def make_ChimeraModel(linear, quadratic):
                     vartype: Vartype = SPIN,
                     unit_num_L: int = 2,
                     model = None,
+                    gpu = False,
                 ):
+
+            self.gpu = gpu
+
             if model:
                 super().__init__(
-                    model.linear, model.quadratic, model.offset, model.vartype
+                    model.linear, model.quadratic, model.offset, model.vartype, gpu=gpu
                 )
             else:
-                super().__init__(linear, quadratic, offset, vartype)
+                super().__init__(linear, quadratic, offset, vartype, gpu=gpu)
             if not unit_num_L:
                 raise ValueError(
                     "Input unit_num_L which is the length of the side of the two-dimensional grid where chimera unit cells are arranged."
@@ -72,7 +76,7 @@ def make_ChimeraModel(linear, quadratic):
             elif self.coordinate == "chimera coordinate":
                 self._chimera_index = lambda i, L: i
                 self._to_index = lambda x, y, z, L: self.to_index(x, y, z, L)
-        
+
         def _validate_indices(self, indices):
             """Check if the type of indices is valid.
 
@@ -194,7 +198,10 @@ def make_ChimeraModel(linear, quadratic):
                 raise ValueError("Problem graph incompatible with chimera graph.")
             _h, _J, _offset = self.to_ising()
 
-            chimera = cj.graph.Chimera(chimera_L, chimera_L)
+            if self.gpu:
+                chimera = cj.graph.ChimeraGPU(chimera_L, chimera_L)
+            else:
+                chimera = cj.graph.Chimera(chimera_L, chimera_L)
 
             for i, hi in _h.items():
                 r_i, c_i, zi = self._chimera_index(i, L = chimera_L)
@@ -208,7 +215,7 @@ def make_ChimeraModel(linear, quadratic):
             for (i, j), Jij in _J.items():
                 r_i, c_i, zi = self._chimera_index(i, L = chimera_L)
                 r_j, c_j, zj = self._chimera_index(j, L = chimera_L)
-    
+
                 # validate connection
                 error_msg = f"In the {chimera_L}*{chimera_L} Chimera grid, "
                 error_msg += f"there is no connection between node {i} and node {j}."
@@ -320,6 +327,7 @@ def ChimeraModel(
         vartype = SPIN,
         unit_num_L: int = 2,
         model = None,
+        gpu: bool = False,
         ):
     """Generate ChimeraModel object
 
@@ -334,6 +342,7 @@ def ChimeraModel(
         vartype: vartype ('SPIN' or 'BINARY')
         unit_num_L (int): unit_num_L
         model (BinaryQuadraticModel): if model is not None, the object is initialized by model.
+        gpu (bool): if true, this can be used for gpu samplers.
     Returns:
         generated ChimeraModel
 
@@ -348,7 +357,7 @@ def ChimeraModel(
 
     Model = make_ChimeraModel(linear, quadratic)
 
-    return Model(linear, quadratic, offset, vartype, unit_num_L, model)
+    return Model(linear, quadratic, offset, vartype, unit_num_L, model, gpu)
 
 
 # classmethods
