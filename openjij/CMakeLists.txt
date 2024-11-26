@@ -32,12 +32,23 @@ if(NOT MSVC AND NOT ${CMAKE_BUILD_TYPE} MATCHES Debug|RelWithDebInfo)
     pybind11_strip(${python_module_name})
 endif()
 
-set_target_properties(${python_module_name} PROPERTIES
+if(CUDAToolkit_FOUND)
+    set_target_properties(${python_module_name} PROPERTIES
         INTERPROCEDURAL_OPTIMIZATION ON
         CXX_VISIBILITY_PRESET "hidden"
         VISIBILITY_INLINES_HIDDEN ON
         POSITION_INDEPENDENT_CODE ON
-)
+        CUDA_VISIBILITY_PRESET "hidden"
+        CUDA_SEPARABLE_COMPILATION ON
+    )
+else()
+    set_target_properties(${python_module_name} PROPERTIES
+        INTERPROCEDURAL_OPTIMIZATION ON
+        CXX_VISIBILITY_PRESET "hidden"
+        VISIBILITY_INLINES_HIDDEN ON
+        POSITION_INDEPENDENT_CODE ON
+    )
+endif()
 
 target_compile_definitions(${python_module_name} PRIVATE 
     PYTHON_VERSION_INFO=${PYTHON_VERSION_STRING}
@@ -50,6 +61,7 @@ target_link_libraries(${python_module_name}  PRIVATE
       pybind11::windows_extras
       pybind11_json
       nlohmann_json::nlohmann_json
+      $<$<TARGET_EXISTS:cxxjij_chimera_gpu_kernel_static>:cxxjij_chimera_gpu_kernel_static>
 )
 
 install(TARGETS ${python_module_name} LIBRARY DESTINATION .)
