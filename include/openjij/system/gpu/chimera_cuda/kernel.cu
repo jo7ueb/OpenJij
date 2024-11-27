@@ -256,7 +256,7 @@ namespace openjij {
                     const ChimeraInfo& info, const dim3& grid, const dim3& block,
                     double beta, FloatType gamma, double s){
 
-                metropolis<FloatType, block_row, block_col, block_trot, info.chimera_unitsize><<<grid, block>>>(
+                metropolis<FloatType, block_row, block_col, block_trot, ChimeraInfo::chimera_unitsize><<<grid, block>>>(
                         sw,
                         spin, rand,
                         J_out_p,
